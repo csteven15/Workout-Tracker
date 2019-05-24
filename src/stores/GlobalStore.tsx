@@ -1,39 +1,26 @@
-import { createContext } from 'react';
-import { observable, decorate, computed } from 'mobx';
+import { observable, computed } from 'mobx';
 import moment from 'moment';
-
-interface Workout {
-  name: string;
-  startDate?: string;
-  endDate?: string;
-  exercises?: [];
-  createTime?: string;
-}
-
-interface Exercise {
-  name: string;
-  reps?: number;
-  weight?: number;
-  description?: string;
-}
+import { persist } from 'mobx-persist';
+import { RootStore } from "./RootStore";
+import { Exercise, Workout } from '../models';
 
 export class GlobalStore {
-  workouts : Workout[] = [];
-  exercises : Exercise[] = [];
+  rootStore: RootStore;
+  constructor(rootStore: RootStore) {
+    this.rootStore = rootStore;
+  }
+
+  @persist("list") @observable workouts : Workout[] = [];
+  @persist("list") @observable exercises : Exercise[] = [];
 
   addWorkout(workout : Workout) : void {
-    workout['createTime'] = moment().toLocaleString();
+    workout.id = workout.id + moment().toLocaleString();
     this.workouts.push(workout);
-    console.log('new', workout)
-    localStorage.setItem('workoutHistory', JSON.stringify(this.workouts));
   }
 
   addExercise(exercise : Exercise) : void {
-    const t = moment();
-    console.log('now', t)
-    const newExercise = exercise;
-    newExercise['name'] = exercise['name'] + t;
-    this.exercises.push(newExercise);
+    exercise.id = exercise.name + moment().toLocaleString();
+    this.exercises.push(exercise);
   }
 
   updateWorkouts(cache : any) : void {
@@ -41,25 +28,14 @@ export class GlobalStore {
   }
 
   deleteWorkouts() : void {
-    localStorage.removeItem('workoutHistory');
     this.workouts = [];
   }
 
-
-  get getWorkouts() : Workout[]{
+  @computed get getWorkouts() : Workout[] {
     return this.workouts;
   }
 
-  get getExercises() : Exercise[] {
+  @computed get getExercises() : Exercise[] {
     return this.exercises;
   }
 }
-
-decorate(GlobalStore, {
-  workouts: observable,
-  exercises: observable,
-  getWorkouts: computed,
-  getExercises: computed
-});
-
-export default createContext(new GlobalStore());

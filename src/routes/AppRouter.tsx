@@ -7,6 +7,7 @@ const Home = React.lazy(() => import('../pages/Home'));
 const PlannedWorkouts = React.lazy(() => import('../pages/PlannedWorkouts'));
 const CompletedWorkouts = React.lazy(() => import('../pages/CompletedWorkouts'));
 const TrackWorkouts = React.lazy(() => import('../pages/TrackWorkouts'));
+const NewWorkout = React.lazy(() => import('../pages/NewWorkout'));
 
 const AppRouter : React.FunctionComponent = () => {
   return (
@@ -18,6 +19,7 @@ const AppRouter : React.FunctionComponent = () => {
             <Route exact path='/planned-workouts' component={PlannedWorkouts} />
             <Route exact path='/completed-workouts' component={CompletedWorkouts} />
             <Route exact path='/track-workouts' component={TrackWorkouts} />
+            <Route exact path='/new-workout' component={NewWorkout} />
           </Switch>
         </React.Suspense>
       </Navigation>

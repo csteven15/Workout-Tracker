@@ -1,64 +1,57 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext } from 'react';
 import { observer } from "mobx-react-lite"
 import { Formik } from 'formik';
 import { TextField, Button, DialogActions } from '@material-ui/core';
-import GlobalStore from '../stores/GlobalStore';
+import { withRouter } from 'react-router';
 
-const TrackWorkouts : React.FunctionComponent = observer((props) => {
-  const context = useContext(GlobalStore);
+import { RootStoreContext } from "../stores/RootStore";
 
-  async function fetchData() {
-    let cache : any = localStorage.getItem('workoutHistory');
-    try {
-      let data = await JSON.parse(cache);
-      if (data) {
-        context.updateWorkouts(data);
-      }
-      console.log(data);
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  useEffect(() => {
-    fetchData();
-  }, [])
+const TrackWorkouts : React.FunctionComponent = observer((props : any) => {
+  const context = useContext(RootStoreContext);
 
   return (
     <div>
       <h4>Track Workouts Page</h4>
       <Formik
         initialValues={{ workoutName: '' }}
-        onSubmit={
-          (values) => {
-            context.addWorkout({name: values.workoutName})
-          }
-        }
-        render={props => (
-          <form onSubmit={props.handleSubmit}>
+        onSubmit={(values) => {
+          // context.globalStore.addWorkout({name: values.workoutName});
+          props.history.push('/new-workout', { workoutName: values.workoutName });
+        }}
+        render={({ values, errors, touched, handleChange, handleBlur, handleSubmit, handleReset }) => (
+          <form onSubmit={handleSubmit}>
             <TextField
               label='Workout Name'
               name='workoutName'
-              value={props.values.workoutName}
-              onChange={props.handleChange}
-              onBlur={props.handleBlur}
-              helperText={(props.errors.workoutName && props.touched.workoutName) && props.errors.workoutName}
+              value={values.workoutName}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              helperText={(errors.workoutName && touched.workoutName) && errors.workoutName}
             />
             <DialogActions>
               <Button
+                variant='outlined'
                 type="button"
-                onClick={() => context.deleteWorkouts()}
+                onClick={() => context.globalStore.deleteWorkouts()}
               >
                 Clear Workouts
               </Button>
+              &nbsp;&nbsp;&nbsp;
               <Button
+                variant='outlined'
+                color='secondary'
                 type="button"
-                onClick={props.handleReset}
+                onClick={handleReset}
               >
                 Reset
               </Button>
-              <Button type="submit" >
-                Submit
+              &nbsp;&nbsp;&nbsp;
+              <Button
+                variant='contained'
+                color='primary'
+                type="submit"
+              >
+                Create New Workout
               </Button>
               {/* <DisplayFormikState {...props} /> */}
             </DialogActions>
@@ -67,12 +60,12 @@ const TrackWorkouts : React.FunctionComponent = observer((props) => {
       />
       <div>
         <h4>Saved Workouts</h4>
-        {context.workouts ? context.workouts.map(workout => {
-          return <h4 key={workout.createTime}>{workout.name}</h4>
+        {context.globalStore.workouts.length !== 0 ? context.globalStore.workouts.map((workout : any) => {
+          return <h4 key={workout.id}>{workout.name}</h4>
         }) : <h4>No Workouts...</h4>}
       </div>
     </div>
   )
 });
 
-export default TrackWorkouts;
+export default withRouter(TrackWorkouts);
